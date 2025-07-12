@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostManager - Never Drop a Single Task</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e1e1e;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 35px;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #6366f1;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>') center/cover;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .hero .description {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .audience-tags {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .audience-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .alternative-contact {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Trusted By Section */
+        .trusted-by {
+            padding: 4rem 0;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .trusted-by h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+
+        .logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            opacity: 0.7;
+        }
+
+        .logo-placeholder {
+            width: 120px;
+            height: 60px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Problem Section */
+        .problem {
+            padding: 4rem 0;
+            background: #fff;
+        }
+
+        .problem h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .problem-item {
+            text-align: left;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .problem-item:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .problem-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: #6366f1;
+        }
+
+        .problem-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .problem-description {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Solution Section New Styles */
+        .solution {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
+        .solution h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #0369a1;
+        }
+
+        .solution-block {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 1rem;
+        }
+
+        .solution-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .solution-subtitle {
+            font-size: 1.1rem;
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 3rem;
+        }
+
+        /* Comparison Table Styles */
+        .comparison-table {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-cell {
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .comparison-cell.legacy {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .comparison-cell .icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .comparison-cell .content {
+            flex-grow: 1;
+        }
+
+        .comparison-cell .title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-cell .description {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* AI Manager Features */
+        .ai-manager {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .manager-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .manager-intro p {
+            color: #64748b;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .manager-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .manager-feature {
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .manager-feature:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .manager-feature .icon {
+            font-size: 1.5rem;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+
+        .manager-feature h4 {
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* AI Agents Grid */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .agent-card .icon {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+
+        .agent-card h4 {
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .agent-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .conclusion-box {
+            background: #f8fafc;
+            border-left: 4px solid #6366f1;
+            padding: 1.5rem;
+            border-radius: 0 12px 12px 0;
+            margin-top: 2rem;
+        }
+
+        .conclusion-box p {
+            color: #1e293b;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 6rem 0;
+            background: #fff;
+        }
+
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+        }
+
+        .step h3 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 6rem 0;
+            background: #f8fafc;
+        }
+
+        .benefits h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #059669;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+
+        .quality-benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .quality-benefit {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .quality-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #10b981;
+        }
+
+        /* Use Cases Section */
+        .use-cases {
+            padding: 4rem 0;
+            background: #fff;
+        }
+
+        .use-cases h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .use-case {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .use-case:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .use-case-icon {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+
+        .use-case h3 {
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .use-case-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .use-case-feature {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .use-case-feature:last-child {
+            margin-bottom: 0;
+        }
+
+        .use-case-feature:before {
+            content: "•";
+            color: #6366f1;
+            margin-right: 0.5rem;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 4rem 0;
+            background: #f8fafc;
+        }
+
+        .pricing h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .pricing-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+
+        .pricing-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 1.25rem;
+            color: white;
+            text-align: center;
+        }
+
+        .pricing-header h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .pricing-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .pricing-content {
+            padding: 1.25rem;
+        }
+
+        .price-stages {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .price-stage {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .price-stage:hover {
+            transform: translateY(-2px);
+            border-color: #6366f1;
+        }
+
+        .stage-icon {
+            font-size: 1.25rem;
+            color: #6366f1;
+            background: #eff6ff;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .stage-content h4 {
+            color: #0f172a;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .stage-content .price {
+            color: #6366f1;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        .stage-content p {
+            color: #64748b;
+            font-size: 0.8rem;
+            line-height: 1.2;
+        }
+
+        .pricing-features {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .pricing-features h4 {
+            color: #0f172a;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #334155;
+            font-size: 0.8rem;
+        }
+
+        .feature-item .icon {
+            color: #22c55e;
+            font-size: 1rem;
+        }
+
+        .roi-highlight {
+            margin-top: 1.25rem;
+            background: #f0fdf4;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid #22c55e;
+            text-align: center;
+        }
+
+        .roi-highlight strong {
+            color: #15803d;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .roi-highlight p {
+            color: #166534;
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .competitors-comparison {
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #e2e8f0;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .competitor-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+
+        .competitor-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .competitor-icon {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 0.375rem;
+            border-radius: 6px;
+        }
+
+        .competitor-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .competitor-name {
+            font-weight: 600;
+            color: #0f172a;
+            white-space: nowrap;
+        }
+
+        .competitor-details {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: #64748b;
+        }
+
+        .competitor-price {
+            color: #334155;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .competitor-note {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        @media (max-width: 640px) {
+            .price-stages {
+                grid-template-columns: 1fr;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .competitor-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .competitor-details {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pricing-content {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Social Proof Section */
+        .social-proof {
+            padding: 6rem 0;
+            background: #fff;
+        }
+
+        .social-proof h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6b21a8;
+            margin-bottom: 0.5rem;
+        }
+
+        .testimonial {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            font-style: italic;
+            border-left: 4px solid #6366f1;
+        }
+
+        /* CTA Section */
+        .final-cta {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .final-cta .subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .contact-form input,
+        .contact-form select,
+        .contact-form textarea {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .contact-form textarea {
+            grid-column: 1 / -1;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .contact-form select {
+            grid-column: 1 / -1;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .alternative-email {
+            margin-top: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero .description {
+                font-size: 1rem;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+
+        /* Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scroll animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1200px) {
+            .problem-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .problem-grid {
+                grid-template-columns: 1fr;
+            }
+            .comparison-table {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-column.ghost-manager {
+                transform: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comparison-table {
+                grid-template-columns: 1fr;
+                margin-bottom: 2rem;
+            }
+            
+            .comparison-column.ghost-manager {
+                transform: none;
+            }
+
+            .solution {
+                padding: 3rem 0;
+            }
+
+            .solution h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .use-case-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comparison-row {
+                grid-template-columns: 1fr;
+            }
+            .comparison-cell.legacy {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+
+        /* GhostManager PROs Section */
+        .pros-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .pro-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .pro-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .pro-card .icon {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+
+        .pro-card h3 {
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pro-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1024px) {
+            .pros-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pros-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .competitors-comparison {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .competitor-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .competitor-icon {
+            color: #ef4444;
+        }
+
+        .competitor-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .competitor-name {
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        .competitor-details {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #64748b;
+        }
+
+        .competitor-price {
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        .competitor-note {
+            color: #64748b;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo"><img src="logo.jpg" alt="GhostManager Logo">GhostManager</div>
+            <ul class="nav-links">
+                <li><a href="#solution">Solution</a></li>
+                <li><a href="#benefits">Benefits</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Never drop a single task</h1>
+                <h2><p class="subtitle">No burnout. No micromanagement. No human error.</p></h4>
+                <p class="description">Professional AI agents for 24/7 operational process management.</p>
+                
+                <div class="cta-section">
+                    <a href="#contact" class="btn-primary">Book a call</a>
+                    <p class="alternative-contact">Prefer email? Reach us at <strong>hello@ghostmanager.ai</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <div class="container">
+            <h2>Do You Recognize These Pains?</h2>
+            <div class="problem-grid">
+                <div class="problem-item animate-on-scroll">
+                    <div class="problem-icon">🕳</div>
+                    <h3 class="problem-title">Unanswered Leads</h3>
+                    <p class="problem-description">Potential clients are lost without follow-up — teams can't keep up with responses.</p>
+                </div>
+
+                <div class="problem-item animate-on-scroll">
+                    <div class="problem-icon">⏰</div>
+                    <h3 class="problem-title">Leadership Wasted on Routine</h3>
+                    <p class="problem-description">C-level executives spend hours on repetitive tasks, getting distracted from strategy.</p>
+                </div>
+
+                <div class="problem-item animate-on-scroll">
+                    <div class="problem-icon">🎯</div>
+                    <h3 class="problem-title">Failed Transformations</h3>
+                    <p class="problem-description">Implementation of new processes often breaks due to chaos, fragmentation, and lack of control.</p>
+                </div>
+
+                <div class="problem-item animate-on-scroll">
+                    <div class="problem-icon">💔</div>
+                    <h3 class="problem-title">Missed Deadlines</h3>
+                    <p class="problem-description">Tasks get lost, deadlines are missed, responsibility is blurred — control slips away.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution" id="solution">
+        <div class="container">
+            <!-- Block 1: Why Different -->
+            <h2>Our Solution: AI Manager That Thinks and Acts</h2>
+            <div class="solution-block">
+                <div class="comparison-table">
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Simple scripted replies</div>
+                                <div class="description">React only when prompted</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Autonomous execution</div>
+                                <div class="description">AI agents handle full tasks without prompts</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Email/chat automation only</div>
+                                <div class="description">Works within isolated channels</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Cross-channel coordination</div>
+                                <div class="description">Agents manage workflows across CRM, email, Slack & more</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Manual oversight required</div>
+                                <div class="description">Deadlines and deliverables must be tracked by team</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">End-to-end task tracking</div>
+                                <div class="description">Agents follow deadlines, status, and assignees — no reminders needed</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Rigid templates</div>
+                                <div class="description">One-size-fits-all workflows</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Custom-fit agents</div>
+                                <div class="description">Each AI is tailored to your unique process and style</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Zero memory</div>
+                                <div class="description">Each interaction starts from scratch</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Contextual memory</div>
+                                <div class="description">Agents recall past interactions, decisions, and owners</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">Static systems</div>
+                                <div class="description">No adaptation or learning over time</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Self-optimizing agents</div>
+                                <div class="description">Agents analyze outcomes and improve their actions continuously</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="comparison-cell legacy">
+                            <div class="icon">❌</div>
+                            <div class="content">
+                                <div class="title">You still manage everything</div>
+                                <div class="description">Time spent chasing updates</div>
+                            </div>
+                        </div>
+                        <div class="comparison-cell">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <div class="title">Proactive management</div>
+                                <div class="description">Agents surface delays, risks, and blockers before you ask</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GhostManager PROs Section -->
+            <h2>GhostManager PROs</h2>
+            <div class="solution-block">
+                <div class="pros-grid">
+                    <div class="pro-card animate-on-scroll">
+                        <div class="icon">🔮</div>
+                    <h3>Preventive Management</h3>
+                        <p>Anticipate and prevent issues before they affect your business operations</p>
+                </div>
+                    <div class="pro-card animate-on-scroll">
+                        <div class="icon">🧠</div>
+                    <h3>Contextual Memory</h3>
+                        <p>Intelligent system that remembers every interaction and decision made</p>
+                </div>
+                    <div class="pro-card animate-on-scroll">
+                        <div class="icon">🎯</div>
+                    <h3>Business Adaptation</h3>
+                        <p>Fully customized solution that adapts to your specific processes and needs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Your Journey with GhostManager Team</h2>
+            <div class="steps">
+                <div class="step animate-on-scroll">
+                    <div class="step-number">1</div>
+                    <h3>Process Analysis</h3>
+                    <p>Deep dive into your current workflows</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">2</div>
+                    <h3>Custom Agent Creation</h3>
+                    <p>Build agents tailored to your needs</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">3</div>
+                    <h3>System Integration</h3>
+                    <p>Connect with CRM, email, messengers</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">4</div>
+                    <h3>24/7 Monitoring</h3>
+                    <p>Continuous oversight and execution</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">5</div>
+                    <h3>Data-Driven Optimization</h3>
+                    <p>Improve performance based on insights</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits">
+        <div class="container">
+            <h2>Results You'll Get</h2>
+            
+            <div class="metrics">
+                <div class="metric-card animate-on-scroll">
+                    <div class="metric-value">3.7×</div>
+                    <p>ROI increase</p>
+                </div>
+                <div class="metric-card animate-on-scroll">
+                    <div class="metric-value">-25%</div>
+                    <p>operational costs</p>
+                </div>
+                <div class="metric-card animate-on-scroll">
+                    <div class="metric-value">21×</div>
+                    <p>higher lead qualification with 5-min response</p>
+                </div>
+                <div class="metric-card animate-on-scroll">
+                    <div class="metric-value">+15</div>
+                    <p>hours saved per week</p>
+                </div>
+            </div>
+
+            <div class="quality-benefits">
+                <div class="quality-benefit animate-on-scroll">
+                    <div class="quality-icon">✅</div>
+                    <h3>Zero Errors</h3>
+                    <p>No forgotten tasks or human mistakes</p>
+                </div>
+                <div class="quality-benefit animate-on-scroll">
+                    <div class="quality-icon">⚡</div>
+                    <h3>Always Available</h3>
+                    <p>Working 24/7 without breaks</p>
+                </div>
+                <div class="quality-benefit animate-on-scroll">
+                    <div class="quality-icon">📈</div>
+                    <h3>Easy Scaling</h3>
+                    <p>Grow capacity without hiring</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="use-cases">
+        <div class="container">
+            <h2>Where Our AI Agents Shine</h2>
+            <div class="use-case-grid">
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">👔</div>
+                    <h3>For C-level</h3>
+                    <ul class="use-case-features">
+                        <li class="use-case-feature">KPI monitoring in real-time</li>
+                        <li class="use-case-feature">Automated performance reports</li>
+                        <li class="use-case-feature">Cross-department coordination</li>
+                        <li class="use-case-feature">Strategic decision support</li>
+                    </ul>
+                </div>
+
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">🏢</div>
+                    <h3>For Business Owners</h3>
+                    <ul class="use-case-features">
+                        <li class="use-case-feature">Critical process control</li>
+                        <li class="use-case-feature">Escalation management</li>
+                        <li class="use-case-feature">Strategic insights delivery</li>
+                        <li class="use-case-feature">Resource optimization</li>
+                    </ul>
+                </div>
+
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">📊</div>
+                    <h3>For Sales Teams</h3>
+                    <ul class="use-case-features">
+                        <li class="use-case-feature">Follow-up automation</li>
+                        <li class="use-case-feature">Real-time CRM updates</li>
+                        <li class="use-case-feature">Pipeline management</li>
+                        <li class="use-case-feature">Lead qualification</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2>Investment in Your Business Future</h2>
+            <div class="pricing-container">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Enterprise-Grade AI Management</h3>
+                        <p>Complete solution for operational excellence</p>
+                    </div>
+                    <div class="pricing-content">
+                        <div class="price-stages">
+                            <div class="price-stage">
+                                <div class="stage-icon">🚀</div>
+                                <div class="stage-content">
+                                    <h4>Initial Setup</h4>
+                    <div class="price">$1,000</div>
+                                    <p>One-time setup fee</p>
+                </div>
+                            </div>
+                            <div class="price-stage">
+                                <div class="stage-icon">📈</div>
+                                <div class="stage-content">
+                                    <h4>Monthly Subscription</h4>
+                    <div class="price">$500-700</div>
+                                    <p>Based on processes</p>
+                    </div>
+                </div>
+                        </div>
+
+                        <div class="pricing-features">
+                            <h4>Everything Included:</h4>
+                            <div class="features-list">
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>Unlimited AI agents</span>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>All integrations</span>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>24/7 monitoring</span>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>Custom automation</span>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>Regular updates</span>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="icon">✓</div>
+                                    <span>Priority support</span>
+                                </div>
+                </div>
+            </div>
+
+                        <div class="roi-highlight">
+                            <strong>ROI in 3-6 months</strong>
+                            <p>Through improved efficiency and reduced costs</p>
+                </div>
+
+                        <div class="competitors-comparison">
+                            <div class="competitor-item">
+                                <span class="competitor-icon">❌</span>
+                                <div class="competitor-content">
+                                    <span class="competitor-name">Chatbots</span>
+                                    <div class="competitor-details">
+                                        <span class="competitor-price">$50-200/month</span>
+                                        <span class="competitor-note">- Limited functionality</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="competitor-item">
+                                <span class="competitor-icon">❌</span>
+                                <div class="competitor-content">
+                                    <span class="competitor-name">Corporate Automation</span>
+                                    <div class="competitor-details">
+                                        <span class="competitor-price">$150K-500K/year</span>
+                                        <span class="competitor-note">- Slow and expensive</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="social-proof">
+        <div class="container">
+            <h2>Join teams that never drop the ball</h2>
+            
+            <div class="results">
+                <div class="result-card animate-on-scroll">
+                    <div class="result-value">+40%</div>
+                    <p>more leads converted</p>
+                </div>
+                <div class="result-card animate-on-scroll">
+                    <div class="result-value">+25</div>
+                    <p>hours saved per week</p>
+                </div>
+                <div class="result-card animate-on-scroll">
+                    <div class="result-value">0</div>
+                    <p>missed tasks in 6 months</p>
+                </div>
+            </div>
+
+            <div class="testimonial animate-on-scroll">
+                <p>"GhostManager transformed our operations. We went from chaos to complete control in just 3 months. Our team can finally focus on strategy instead of firefighting."</p>
+                <p><strong>- Sarah Johnson, CEO at TechScale</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="final-cta" id="contact">
+        <div class="container">
+            <h2>Start Working Without Losses Today</h2>
+            <p class="subtitle">"We'll ask what's breaking — and create a solution that works."</p>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Your Name" required>
+                    <input type="email" name="email" placeholder="Your Email" required>
+                </div>
+                <input type="text" name="company" placeholder="Company Name" required>
+                <select name="problem" required>
+                    <option value="">Select Primary Problem</option>
+                    <option value="lead-management">Lead Management Issues</option>
+                    <option value="process-automation">Process Automation</option>
+                    <option value="task-tracking">Task Tracking & Deadlines</option>
+                    <option value="team-coordination">Team Coordination</option>
+                    <option value="crm-integration">CRM Integration</option>
+                    <option value="other">Other</option>
+                </select>
+                <textarea name="message" placeholder="Tell us about your specific challenges..."></textarea>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+            
+            <p class="alternative-email">Email us directly at <strong>hello@ghostmanager.ai</strong></p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 GhostManager. All rights reserved. | Professional AI agents for operational excellence.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Simulate form submission
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                submitBtn.textContent = 'Message Sent!';
+                submitBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                // Reset form
+                this.reset();
+                
+                setTimeout(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+                }, 2000);
+            }, 1000);
+        });
+
+        // Add some dynamic interactions
+        document.querySelectorAll('.metric-card, .result-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+
+        // Add typing effect to hero title
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        // Initialize typing effect when page loads
+        window.addEventListener('load', function() {
+            const heroTitle = document.querySelector('.hero h1');
+            const originalText = heroTitle.textContent;
+            typeWriter(heroTitle, originalText, 80);
+        });
+    </script>
+</body>
+</html>
